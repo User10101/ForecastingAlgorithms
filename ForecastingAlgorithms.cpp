@@ -3,13 +3,13 @@
 using namespace std;
 using namespace ForecastingAlgorithms;
 
-//-----------------------------------------------------------------
-// Moving Average Implementation
-//-----------------------------------------------------------------
+///-----------------------------------------------------------------
+/// Moving Average Implementation
+///-----------------------------------------------------------------
 
 MovingAverage::MovingAverage(const int n) : base(n)
 {
-
+    DONOTHING();
 }
 
 //-----------------------------------------------------------------
@@ -34,13 +34,13 @@ Value MovingAverage::DoPrediction(Value value, History history)
     return result;
 }
 
-//-----------------------------------------------------------------
-// Exponential Smoothing Implementation
-//-----------------------------------------------------------------
+///-----------------------------------------------------------------
+/// Exponential Smoothing Implementation
+///-----------------------------------------------------------------
 
 ExponentialSmoothing::ExponentialSmoothing(const double a) : base(a)
 {
-
+    DONOTHING()
 }
 
 //-----------------------------------------------------------------
@@ -60,10 +60,55 @@ Value ExponentialSmoothing::DoPrediction(Value value, History history)
     return result;
 }
 
+///-----------------------------------------------------------------
+/// Regression Analysis Implementation
+///-----------------------------------------------------------------
+
+RegressionAnalysis::RegressionAnalysis()
+{
+    DONOTHING()
+}
+
+//-----------------------------------------------------------------
+
+Value RegressionAnalysis::DoPrediction(Value value, History history)
+{
+    double sumX, sumY, sumXY, sumX2, sumY2;
+    double a, b;
+    double _x, _y;
+    const int n = history.size();
+    int t = history.size();
+
+    sumX = sumY = sumXY = sumX2 = sumY2 = 0;
+
+    for(int i = 0; i < n; ++i)
+    {
+        sumX += i;
+        sumY += history[i];
+        sumXY += i*history[i];
+        sumX2 += i*i;
+        sumY2 += history[i]*history[i];
+    }
+
+    _x = sumX/n;
+    _y = sumY/n;
+
+    b = (sumXY- n*_x*_y) / (sumX2 - n*_x*_x);
+    a = _y - b*_x;
+
+    double result = a + b*t;
+    return result;
+}
+
+///-----------------------------------------------------------------
+/// main function
+///-----------------------------------------------------------------
+
 int main()
 try{
     MovingAverage mv(4);
     ExponentialSmoothing es(0.3);
+    RegressionAnalysis ra;
     History p(4);
     p[0] = 2;
     p[1] = 3;
@@ -72,9 +117,14 @@ try{
 
     cout << mv.DoPrediction(4, p) << endl;
     cout << es.DoPrediction(4, p) << endl;
+    cout << ra.DoPrediction(4, p) << endl;
 
     return 0;
 }
+
+///-----------------------------------------------------------------
+/// exception handlers
+///-----------------------------------------------------------------
 
 catch(IncorrectHistoryException e)
 {

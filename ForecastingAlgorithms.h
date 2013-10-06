@@ -4,13 +4,20 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
+#include "Std_Deviation.h"
+#include "Equations.h"
+#include "Matrix.h"
+
+#define DONOTHING()
 
 namespace ForecastingAlgorithms
 {
     typedef std::vector<double> History;
     typedef double Value;
 
-    //-----------------------------------------------------------------
+    ///-----------------------------------------------------------------
+    /// base class interface
+    ///-----------------------------------------------------------------
 
     class ForecastingAlgorithm
     {
@@ -21,7 +28,9 @@ namespace ForecastingAlgorithms
             ForecastingAlgorithm() {};
     };
 
-    //-----------------------------------------------------------------
+    ///-----------------------------------------------------------------
+    /// main class interfaces
+    ///-----------------------------------------------------------------
 
     class MovingAverage : public ForecastingAlgorithm
     {
@@ -47,6 +56,33 @@ namespace ForecastingAlgorithms
     };
 
     //-----------------------------------------------------------------
+
+    class RegressionAnalysis : public ForecastingAlgorithm
+    {
+        public:
+            RegressionAnalysis();
+            Value DoPrediction(Value value, History history);
+    };
+
+    //-----------------------------------------------------------------
+
+    class AutoregressiveModel : public ForecastingAlgorithm
+    {
+        public:
+            AutoregressiveModel(int sft);
+        private:
+            Vector v;
+            int shift;
+            int size;
+            Matrix CorrelationMatrix;
+            Vector Correlations;
+    };
+
+    //-----------------------------------------------------------------
+
+    ///-----------------------------------------------------------------
+    /// exception class implementations
+    ///-----------------------------------------------------------------
 
     class IncorrectHistoryException
     {
