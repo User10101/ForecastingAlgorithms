@@ -14,6 +14,11 @@ namespace ForecastingAlgorithms
 {
     typedef std::vector<double> History;
     typedef double Value;
+    typedef Matrix_lib::matrix<double> Matrix;
+    typedef std::vector<double> Vector;
+
+    using Std_Deviation::StdDeviation;
+    using Equations::GaussianElimination;
 
     ///-----------------------------------------------------------------
     /// base class interface
@@ -24,6 +29,7 @@ namespace ForecastingAlgorithms
         public:
             virtual Value DoPrediction(Value value, History history) = 0;
             virtual ~ForecastingAlgorithm() {};
+            virtual std::string GetName() = 0;
         protected:
             ForecastingAlgorithm() {};
     };
@@ -37,10 +43,9 @@ namespace ForecastingAlgorithms
         public:
             MovingAverage(int n);
             Value DoPrediction(Value value, History history);
-
-            inline int GetBase() { return base; }
+            std::string GetName() { return std::string("Moving Average"); }
         private:
-            int base;
+            int m_base;
     };
 
     //-----------------------------------------------------------------
@@ -50,9 +55,9 @@ namespace ForecastingAlgorithms
         public:
             ExponentialSmoothing(const double a);
             Value DoPrediction(Value value, History history);
-            double GetBase() { return base; }
+            std::string GetName() { return std::string("Exponential Smoothing"); }
         private:
-            double base;
+            double m_base;
     };
 
     //-----------------------------------------------------------------
@@ -62,6 +67,7 @@ namespace ForecastingAlgorithms
         public:
             RegressionAnalysis();
             Value DoPrediction(Value value, History history);
+            std::string GetName() { return std::string("Regression Analysis"); }
     };
 
     //-----------------------------------------------------------------
@@ -70,15 +76,19 @@ namespace ForecastingAlgorithms
     {
         public:
             AutoregressiveModel(int sft);
+            Value DoPrediction(Value value, History history);
+            std::string GetName() { return std::string("Autoregressive Model"); }
         private:
-            Vector v;
-            int shift;
-            int size;
-            Matrix CorrelationMatrix;
-            Vector Correlations;
-    };
+            Vector Slice(Vector v1, int start);
+            Vector CalculateAutocorrelation();
+            Value CalculateCovariance(Vector v1, Vector v2);
 
-    //-----------------------------------------------------------------
+            Vector m_v;
+            int m_shift;
+            int m_size;
+            Matrix m_correlationMatrix;
+            Vector m_correlations;
+    };
 
     ///-----------------------------------------------------------------
     /// exception class implementations
@@ -87,10 +97,10 @@ namespace ForecastingAlgorithms
     class IncorrectHistoryException
     {
         public:
-            IncorrectHistoryException(std::string msg) : message(msg) {};
-            std::string GetMessage() { return message; };
+            IncorrectHistoryException(std::string msg) : m_message(msg) {};
+            std::string GetMessage() { return m_message; };
         private:
-            std::string message;
+            std::string m_message;
     };
 
 } // of ForecastingAlgorithms
