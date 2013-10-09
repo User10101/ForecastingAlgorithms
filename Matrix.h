@@ -21,64 +21,64 @@ namespace Matrix_lib
     class matrix
     {
         public:
-            matrix(int ii, int jj) : nrow(ii), ncol(jj)
+            matrix(int ii, int jj) : m_nrow(ii), m_ncol(jj)
             {
-                vector<T> empty_row;
-                for(int i = 0; i < ncol; ++i)
-                    empty_row.push_back(T());
-                for(int j = 0; j < nrow; ++j)
+                vector<T> emptyRow;
+                for(int i = 0; i < m_ncol; ++i)
+                    emptyRow.push_back(T());
+                for(int j = 0; j < m_nrow; ++j)
                 {
-                    elems.push_back(empty_row);
+                    m_elems.push_back(emptyRow);
                 }
             }
 
-            int dim1() const { return ncol; } // количество элементов в строке
-            int dim2() const { return nrow; } // количество строк
+            int Dim1() const { return m_ncol; } // количество элементов в строке
+            int Dim2() const { return m_nrow; } // количество строк
 
             vector<T>& operator[](int n)
             {
-                if(n >= nrow) throw IndexingError();
-                return elems[n];
+                if(n >= m_nrow) throw IndexingError();
+                return m_elems[n];
             }
 
-            void row(vector<T> v, int ind)
+            void Row(vector<T> v, int ind)
             {
-                if(v.size() > ncol || ind >= nrow)
+                if(v.size() > m_ncol || ind >= m_nrow)
                     throw IndexingError();
 
-                elems[ind] = v;
+                m_elems[ind] = v;
             }
-            vector<T> row(int ind)
+            vector<T> Row(int ind)
             {
-                if(ind >= nrow)
+                if(ind >= m_nrow)
                     throw IndexingError();
-                return elems[ind];
+                return m_elems[ind];
             }
 
-            void swap_rows(int f, int s)
+            void SwapRows(int f, int s)
             {
                 vector<T> temp;
-                temp = row(f);
-                row(row(s), f);
-                row(temp, s);
+                temp = Row(f);
+                Row(Row(s), f);
+                Row(temp, s);
             }
 
             matrix<T>& operator =(matrix<T> m)
             {
-                elems.resize(m.dim2());
-                ncol = m.dim1();
-                nrow = m.dim2();
+                m_elems.resize(m.Dim2());
+                m_ncol = m.Dim1();
+                m_nrow = m.Dim2();
 
-                for(int i = 0; i < nrow; ++i)
+                for(int i = 0; i < m_nrow; ++i)
                 {
-                    elems[i].resize(m.dim1());
+                    m_elems[i].resize(m.Dim1());
                 }
 
-                for(int j = 0; j < m.dim2(); ++j)
+                for(int j = 0; j < m.Dim2(); ++j)
                 {
-                    for(int i = 0; i < m.dim1(); ++i)
+                    for(int i = 0; i < m.Dim1(); ++i)
                     {
-                        elems[j][i] = m[j][i];
+                        m_elems[j][i] = m[j][i];
                     }
                 }
 
@@ -87,15 +87,15 @@ namespace Matrix_lib
 
             matrix<T> operator *(matrix<T> m)
             {
-                matrix<T> result(m.dim1(), dim2());
+                matrix<T> result(m.Dim1(), Dim2());
 
-                for(int i = 0; i < dim2(); ++i)
+                for(int i = 0; i < Dim2(); ++i)
                 {
-                    for(int j = 0; j < m.dim1(); ++j)
+                    for(int j = 0; j < m.Dim1(); ++j)
                     {
-                        for(int k = 0; k < dim1(); ++k)
+                        for(int k = 0; k < Dim1(); ++k)
                         {
-                            result[i][j] += elems[i][k]*m[k][j];
+                            result[i][j] += m_elems[i][k]*m[k][j];
                         }
                     }
                 }
@@ -106,10 +106,10 @@ namespace Matrix_lib
             matrix<T> Inverse();
 
         private:
-            int nrow;
-            int ncol;
+            int m_nrow;
+            int m_ncol;
 
-            vector< vector<T> > elems;
+            vector< vector<T> > m_elems;
 
             friend bool MakeSquare<>(matrix<T>&, T);
     };
@@ -119,9 +119,9 @@ namespace Matrix_lib
     template<class T>
     ostream& operator << (ostream& stream, matrix<T> m)
     {
-        for(int i = 0; i < m.dim2(); ++i)
+        for(int i = 0; i < m.Dim2(); ++i)
         {
-            for(int j = 0; j < m.dim1(); ++j)
+            for(int j = 0; j < m.Dim1(); ++j)
             cout << m[i][j] << ' ';
 
             cout << endl;
@@ -148,9 +148,9 @@ namespace Matrix_lib
     template<class T>
     istream& operator >> (istream& stream, matrix<T>& m)
     {
-        for(int j = 0; j < m.dim2(); ++j)
+        for(int j = 0; j < m.Dim2(); ++j)
         {
-            for(int i = 0; i < m.dim1(); ++i)
+            for(int i = 0; i < m.Dim1(); ++i)
             {
                 cin >> m[j][i];
             }
@@ -191,7 +191,10 @@ namespace Matrix_lib
         if(v1.size() != v2.size()) return 0;
 
         T sum = 0;
-        for(int i = 0; i < v1.size(); ++i) sum += v1[i]*v2[i];
+        for(int i = 0; i < v1.size(); ++i)
+        {
+            sum += v1[i]*v2[i];
+        }
 
         return sum;
     }
@@ -199,10 +202,10 @@ namespace Matrix_lib
     template<class T>
     vector<T> operator * (matrix<T> m, vector<T> v)
     {
-        vector<T> result(m.dim2());
+        vector<T> result(m.Dim2());
 
-        for(int i = 0; i < m.dim2(); ++i)
-            result[i] = dot_product(m.row(i), v);
+        for(int i = 0; i < m.Dim2(); ++i)
+            result[i] = DotProduct(m.Row(i), v);
 
         return result;
     }
@@ -210,7 +213,10 @@ namespace Matrix_lib
     template<class T>
     vector<T> operator - (vector<T> v1, vector<T> v2)
     {
-        for(int i = 0; i < v1.size(); ++i) v1[i] -= v2[i];
+        for(int i = 0; i < v1.size(); ++i)
+        {
+            v1[i] -= v2[i];
+        }
 
         return v1;
     }
@@ -218,26 +224,32 @@ namespace Matrix_lib
     template<class T>
     vector<T> operator + (vector<T> v1, vector<T> v2)
     {
-        for(int i = 0; i < v1.size(); ++i) v1[i] += v2[i];
+        for(int i = 0; i < v1.size(); ++i)
+        {
+            v1[i] += v2[i];
+        }
 
         return v1;
     }
 
     template <class T>
-    bool MakeSquare(matrix<T>& m, T empty_elem = T())
+    bool MakeSquare(matrix<T>& m, T emptyElem = T())
     {
-        const int last_col = m.dim1() - 1;
+        const int lastCol = m.Dim1() - 1;
 
-        for(int i = 0; i < m.dim2(); ++i)
+        for(int i = 0; i < m.Dim2(); ++i)
         {
-            if(m[i][last_col] != empty_elem) return false;
+            if(m[i][lastCol] != emptyElem)
+            {
+                return false;
+            }
         }
 
-        matrix<T> temp(m.dim1()-1, m.dim2());
+        matrix<T> temp(m.Dim1()-1, m.Dim2());
 
-        for(int j = 0; j < temp.dim2(); ++j)
+        for(int j = 0; j < temp.Dim2(); ++j)
         {
-            for(int i = 0; i < temp.dim1(); ++i)
+            for(int i = 0; i < temp.Dim1(); ++i)
             {
                 temp[j][i] = m[j][i];
             }
@@ -253,39 +265,39 @@ namespace Matrix_lib
     {
         //if(dim1() != dim2()) throw nonsquare_matrix();
 
-        matrix<T> m(dim2(), dim1()*2);
-        const int n = m.dim1();
+        matrix<T> m(Dim2(), Dim1()*2);
+        const int n = m.Dim1();
 
-        for(int i = 0; i < m.dim2(); ++i)
+        for(int i = 0; i < m.Dim2(); ++i)
         {
-            for(int j = 0; j < m.dim1()/2; ++j)
+            for(int j = 0; j < m.Dim1()/2; ++j)
             {
-                m[i][j] = elems[i][j];
+                m[i][j] = m_elems[i][j];
             }
         }
 
-        for(int i = 0; i < m.dim2(); ++i)
+        for(int i = 0; i < m.Dim2(); ++i)
         {
-            for(int j = m.dim1()/2; j < m.dim1(); ++j)
+            for(int j = m.Dim1()/2; j < m.Dim1(); ++j)
             {
-                if(j-m.dim1()/2 == i) m[i][j] = 1;
+                if(j-m.Dim1()/2 == i) m[i][j] = 1;
                 else m[i][j] = 0;
             }
         }
 
-        for(int j = 0; j < m.dim2()-1; ++j)
+        for(int j = 0; j < m.Dim2()-1; ++j)
         {
             const double pivot  = m[j][j];
             if(pivot == 0) throw Nil();
 
-            for(int i = j+1; i < m.dim2(); ++i)
+            for(int i = j+1; i < m.Dim2(); ++i)
             {
                 const double mult = m[i][j]/pivot;
-                m.row(scale_and_add(m.row(j), -mult, m.row(i)), i);
+                m.Row(ScaleAndAdd(m.Row(j), -mult, m.Row(i)), i);
             }
         }
 
-        for(int j = m.dim2()-1; j >= 0; --j)
+        for(int j = m.Dim2()-1; j >= 0; --j)
         {
             const double pivot  = m[j][j];
             if(pivot == 0) throw Nil();
@@ -293,28 +305,28 @@ namespace Matrix_lib
             for(int i = j-1; i >= 0; --i)
             {
                 const double mult = m[i][j]/pivot;
-                m.row(scale_and_add(m.row(j), -mult, m.row(i)), i);
+                m.row(scalAanAadd(m.Row(j), -mult, m.Row(i)), i);
             }
         }
 
-        for(int i = 0; i < m.dim2(); ++i)
+        for(int i = 0; i < m.Dim2(); ++i)
         {
             if(m[i][i] != 1)
             {
                 double mult = m[i][i];
-                for(int j = 0; j < m.dim1(); ++j)
+                for(int j = 0; j < m.Dim1(); ++j)
                 {
                     m[i][j] /= mult;
                 }
             }
         }
 
-        matrix<T> result(m.dim1()/2, m.dim2());
-        for(int i = 0; i < m.dim2(); ++i)
+        matrix<T> result(m.Dim1()/2, m.Dim2());
+        for(int i = 0; i < m.Dim2(); ++i)
         {
-            for(int j = m.dim1()/2; j < m.dim1(); ++j)
+            for(int j = m.Dim1()/2; j < m.Dim1(); ++j)
             {
-                result[i][j-m.dim1()/2] = m[i][j];
+                result[i][j-m.Dim1()/2] = m[i][j];
             }
         }
 
